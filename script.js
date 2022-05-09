@@ -1,182 +1,127 @@
-let main="x";
-let sert=[];
-let countx=0;
-let county=0;
-let f1=document.querySelector(".ass");
-let x=document.getElementById("10");
-x.innerHTML=`x is ${countx}`
-let y=document.getElementById("11");
-y.innerHTML=`o is ${county}`;
+let winCases =[ [0, 1, 2],
+                [3, 4, 5],
+                [6, 7, 8],
+                [0, 4, 8],
+                [6, 4, 2],
+                [2, 5, 8],
+                [1, 4, 7],
+                [0, 3, 6] ];
+let humanPlayer = "X";
+let aiPlayer = "O";
+let currentState = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+let restart = document.querySelector(".restart");
+let cells = document.querySelectorAll(".cell");
+let winner =  document.querySelector(".winner");
+let winText = document.querySelector(".win-txt");
 
-// prevent click on header
-let sh =document.getElementById("0");
+restart.addEventListener("click",()=>{
+    currentState = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+    cells.forEach(cell=>{
+        cell.innerText = "";
+        cell.style.backgroundColor = `rgb(36,178,230)`;
+        winner.style.display = "none";
+    });
+})
 
+cells.forEach(cell=>cell.addEventListener("click",cellClick));
 
+function cellClick(event){
+    if(typeof currentState[event.target.id] == "number"){
+        event.target.innerText = humanPlayer;
+        currentState[event.target.id] = humanPlayer;
+        
+        
+            
+            if(getEmptyCells().length != 0){
 
-function result(){
-        if(f1.innerHTML==="x winner"){
-            countx++;
-            window.localStorage.setItem("x",countx)
-            x.innerHTML=`x is ${countx}`
-            y.innerHTML=`o is ${county}`
-        }
-
-    
-
-    else if(f1.innerHTML==="o winner"){
-            county++;
-            window.localStorage.setItem("o",county)
-            y.innerHTML=`o is ${county}`
-            x.innerHTML=`x is ${countx}`
-        }
+                let bestStateIndex = minmax(aiPlayer,currentState).index;
+                document.getElementById(currentState[bestStateIndex]).innerText = aiPlayer;
+                currentState[bestStateIndex] = aiPlayer;
+                let winCase = isWin(aiPlayer,currentState);
+                if(winCase > -1 ){
+                    displayWinner(winCase, aiPlayer);
+                }
+            }else {
+                winText.innerText = `No  Winner`;
+                winner.style.display = "flex";
+            }
+            
+        
+    }
     
 }
-function endgame(n1,n2,n3){
-    f1.innerHTML=`${sert[n1]} winner`;
-    document.getElementById(n1).style.backgroundColor="green"
-    document.getElementById(n2).style.backgroundColor="green"
-    document.getElementById(n3).style.backgroundColor="green";
-    result()
+function isWin(player,node){
+    let playerCells = node.reduce((prv,cell,index)=>{
+        //collecting the cells that the player(ai,humen) had played in
+            return cell == player?  prv.concat(index): prv}
+            ,[])
 
-    for(i=1;i<=9;i++){
-        let f3=document.getElementById(i)
-        f3.onclick=(function(){
-            if(f3.innerHTML!=="x"&&f3.innerHTML!=="o"){
-            f3.innerHTML=""
+    for([winCaseIndex,winCase] of winCases.entries()){
+        if(winCase.every(cell=>playerCells.indexOf(cell) > -1)){//if all a win case exist in it 
+            winCaseIndex;
+            return winCaseIndex;
+        }
+    }
+    return -1;
+}
+function displayWinner(winCase,player){
+    
+        winCases[winCase].forEach(cell => document.getElementById(cell).style.backgroundColor ="green");
+        winText.innerText = `${player} Win`;
+        winner.style.display = "flex";
+    
+}
+function getEmptyCells(){
+    return currentState.filter(cell=> typeof cell == "number");
+}
+function minmax(player,newState){
+    let emptyCells = getEmptyCells();
+
+    if(isWin(aiPlayer,newState)> -1){return {cost: 10};}
+    else if(isWin(humanPlayer,newState)> -1){return {cost: -10};}
+    else if(emptyCells.length === 0){return {cost:0};}
+
+    let nodes =[]
+    emptyCells.forEach((cell)=>{
+        let node = {};
+        node.index = newState[cell];//save the position so we can back to it
+        newState[cell] = player;
+        
+        if(player == aiPlayer){
+            let result = minmax(humanPlayer,newState);
+            node.cost =result.cost;
+        }
+        else {
+            let result = minmax(aiPlayer,newState);
+            node.cost = result.cost;
+        }
+
+        newState[cell] = node.index; //reset the position 
+
+        nodes.push(node);
+
+        
+    })
+    let bestStateIndex ,bestCost;
+    if(player === aiPlayer){
+        //get the largest cost
+        bestCost = -100000;
+        nodes.forEach((state,index)=>{
+            if(state.cost > bestCost){
+                bestCost = state.cost;
+                bestStateIndex = index;
+            }
+        })
+    }else {
+
+        bestCost = 100000;
+        nodes.forEach((state,index)=>{
+            if(state.cost < bestCost){
+                bestCost = state.cost;
+                bestStateIndex = index;
             }
         })
     }
-    setInterval(function(){
-        f1.innerHTML+="*"
-    },1000);
-    setTimeout(function(){
-        location.reload();
-        
-    },4000)
-};
-countx=window.localStorage.getItem("x");
-county=window.localStorage.getItem("o");
-let rt=document.querySelector(".result")
-rt.onclick=(function(){
-    sh.style.height="493px"
-if(window.localStorage.getItem("x")||window.localStorage.getItem("o")){
-    let countxx= window.localStorage.getItem("x");
-    countx=countxx
-    x.innerHTML=`x is ${countxx}`;
-    let countyy= window.localStorage.getItem("o");
-    county=countyy
-    y.innerHTML=`o is ${countyy}`;
-    rt.style.backgroundColor="#005758"
-}
-    let rt2=document.getElementById("10")
-    let rt3=document.getElementById("11")
-    if (rt2.style.display==="block"&&rt3.style.display==="block"){
-        rt2.style.display="none"
-        rt3.style.display="none"
-        rt.innerHTML="show result"
-        rt.style.backgroundColor="#24b2e6";
-        sh.style.height="405px"
-    }
-    else{
-        rt2.style.display="block"
-        rt3.style.display="block"
-        rt.innerHTML="close result"
-        
-    }
-})
 
-
-
-
-
-    for(i=1;i<=9;i++){
-        let f2=document.getElementById(i)
-        f2.onclick=function game(){
-        if(main==="x"&&f2.innerHTML=="")
-        {
-            f2.innerHTML="x";
-            main="o"
-            f1.innerHTML="the role of o"
-        }
-        else if(main==="o"&&f2.innerHTML=="")
-        {
-            f2.style.color="red"
-            f2.innerHTML="o";
-            main="x"
-            f1.innerHTML="the role of x"
-        }
-        winner();
-        nowinner();
-        }
-    }
-function winner(){
-    for(i=1;i<=9;i++)
-    {
-        sert[i]=document.getElementById(i).innerHTML;
-    }
-    if(sert[1]==sert[2]&&sert[2]==sert[3]&&sert[1]!=="")
-    {
-        endgame(1,2,3)
-        
-    }
-    else if(sert[4]==sert[5]&&sert[5]==sert[6]&&sert[4]!=="")
-    {
-        endgame(4,5,6)
-    }
-    else if(sert[7]==sert[8]&&sert[8]==sert[9]&&sert[7]!=="")
-    {
-        endgame(7,8,9)
-    }
-    else if(sert[1]==sert[4]&&sert[4]==sert[7]&&sert[1]!=="")
-    {
-        endgame(1,4,7)
-    }
-    else if(sert[2]==sert[5]&&sert[5]==sert[8]&&sert[2]!=="")
-    {
-        endgame(2,5,8)
-    }
-    else if(sert[3]==sert[6]&&sert[6]==sert[9]&&sert[9]!=="")
-    {
-        endgame(3,6,9)
-    }
-    else if(sert[1]==sert[5]&&sert[5]==sert[9]&&sert[1]!=="")
-    {
-        endgame(1,5,9)
-    }
-    else if(sert[3]==sert[5]&&sert[5]==sert[7]&&sert[3]!=="")
-    {
-        endgame(3,5,7)
-    }
-    
-
-
-}
-function nowinner(){
-    for(i=1;i<=9;i++)
-    {
-        sert[i]=document.getElementById(i).innerHTML;
-    }
-    if(sert[1]!==""&&sert[2]!==""&&sert[4]!==""&&sert[5]!==""&&sert[3]!==""&&sert[6]!==""&&sert[7]!==""&&sert[8]!==""&&sert[9]!=="")
-    
-    {
-        for(i=1;i<=9;i++){
-            let f4=document.getElementById(i)
-            f4.onclick=(function(){
-                if(f4.innerHTML=="x"&&f3.innerHTML=="o"){
-            
-                }
-            })
-        }
-        
-        f1.innerHTML="no winner"
-        setInterval(function(){
-            f1.innerHTML+="*"
-        },1000);
-        setTimeout(function(){
-            location.reload()
-        },4000)
-    }
-
-    
-
+    return nodes[bestStateIndex]
 }

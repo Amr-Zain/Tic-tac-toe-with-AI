@@ -6,24 +6,27 @@
         <title>tic tac toe</title>
     </head>
     <body>
-        <div class="game" id="0" >
-            <button class="ass"><span>tic tac toe</span> game</button>
+        <div class="game" id="-1" >
+            <button class="title"><span>tic tac toe</span> game</button>
 
-            <button  class="x" id="1"></button>
-            <button class="x" id="2"></button>
-            <button class="x" id="3"></button>
+            <button class="cell" id="0"></button>
+            <button class="cell" id="1"></button>
+            <button class="cell" id="2"></button>
 
-            <button class="x" id="4"></button>
-            <button class="x" id="5"></button>
-            <button class="x" id="6"></button> 
+            <button class="cell" id="3"></button>
+            <button class="cell" id="4"></button>
+            <button class="cell" id="5"></button> 
 
-            <button class="x" id="7"></button>
-            <button class="x" id="8"></button>
-            <button class="x" id="9"></button>
+            <button class="cell" id="6"></button>
+            <button class="cell" id="7"></button>
+            <button class="cell" id="8"></button>
 
             <button class="count" id="10"></button>
             <button class="count count1" id="11"></button>
-            <button class="result">show result</button>
+            <button class="restart">Restart</button>
+            <div class="winner">
+                <div class="win-txt"> you win</div>
+            </div>
         </div>
         <script src="./script.js"></script>
     </body>
